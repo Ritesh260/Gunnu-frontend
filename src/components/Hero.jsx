@@ -1,11 +1,12 @@
 // src/components/Hero.jsx
 
 import { ArrowRight, Star } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function Hero() {
   return (
     <section className="relative min-h-screen bg-black text-white flex items-center overflow-hidden pt-24">
-      
+
       {/* Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-center opacity-20"
@@ -18,12 +19,12 @@ function Hero() {
       {/* Red Gradient Glow */}
       <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-red-950/40 via-black to-black"></div>
 
-      {/* Golden Blur Circle */}
+      {/* Golden Blur */}
       <div className="absolute top-32 right-10 w-72 h-72 bg-yellow-500/10 blur-3xl rounded-full"></div>
 
       {/* Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-10 grid lg:grid-cols-2 gap-12 items-center w-full">
-        
+
         {/* Left Side */}
         <div>
           <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-yellow-500/30 bg-white/5 text-yellow-400 text-sm mb-6">
@@ -44,13 +45,22 @@ function Hero() {
 
           {/* Buttons */}
           <div className="mt-8 flex flex-col sm:flex-row gap-4">
-            <button className="px-7 py-4 rounded-full bg-gradient-to-r from-red-800 to-yellow-500 font-semibold hover:scale-105 transition duration-300 shadow-xl flex items-center justify-center gap-2">
-              Order Now <ArrowRight size={18} />
-            </button>
 
-            <button className="px-7 py-4 rounded-full border border-yellow-500/40 hover:bg-yellow-500 hover:text-black transition duration-300 font-semibold">
+            {/* Order Button */}
+            <Link
+              to="/order"
+              className="px-7 py-4 rounded-full bg-gradient-to-r from-red-800 to-yellow-500 font-semibold hover:scale-105 transition duration-300 shadow-xl flex items-center justify-center gap-2"
+            >
+              Order Now <ArrowRight size={18} />
+            </Link>
+
+            {/* Explore Menu */}
+            <a
+              href="#menu"
+              className="px-7 py-4 rounded-full border border-yellow-500/40 hover:bg-yellow-500 hover:text-black transition duration-300 font-semibold text-center"
+            >
               Explore Menu
-            </button>
+            </a>
           </div>
 
           {/* Stats */}
@@ -72,7 +82,7 @@ function Hero() {
           </div>
         </div>
 
-        {/* Right Side Food Image */}
+        {/* Right Side */}
         <div className="relative flex justify-center">
           <div className="absolute w-80 h-80 bg-red-700/20 blur-3xl rounded-full"></div>
 

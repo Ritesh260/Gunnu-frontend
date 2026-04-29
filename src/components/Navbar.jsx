@@ -27,7 +27,7 @@ function Navbar() {
               <span className="text-yellow-500 drop-shadow-md">
                 Chinese
               </span>{" "}
-              <span className="text-red-700">Corner</span>
+              
             </h1>
           </a>
 

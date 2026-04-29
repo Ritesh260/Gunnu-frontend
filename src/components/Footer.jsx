@@ -129,7 +129,7 @@ function Footer() {
         <div className="mt-14 pt-6 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-gray-400 text-sm">
           <p>© 2026 Gunnu Chinese Corner. All Rights Reserved.</p>
 
-          <p>Designed with ❤️ for a premium food experience</p>
+          <p>Designed & Developed with ❤️ by Ritesh Mali</p>
         </div>
       </div>
     </footer>
