@@ -1,16 +1,31 @@
 // src/components/Gallery.jsx
 
+import { useEffect, useState } from "react";
+import axios from "axios";
 import { Search, Camera } from "lucide-react";
 
 function Gallery() {
-  const images = [
-    "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80",
-    "https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=900&q=80",
-    "https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=900&q=80",
-    "https://images.unsplash.com/photo-1604908176997-4314edcb7f1c?auto=format&fit=crop&w=900&q=80",
-    "https://images.unsplash.com/photo-1617093727343-374698b1b08d?auto=format&fit=crop&w=900&q=80",
-    "https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&w=900&q=80",
-  ];
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  /* FETCH IMAGES FROM BACKEND */
+  const fetchImages = async () => {
+    try {
+      const res = await axios.get(
+        "https://gunnu-dashboard.onrender.com/api/gallery"
+      );
+
+      setImages(res.data.images || []);
+    } catch (err) {
+      console.log("Gallery fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
 
   return (
     <section
@@ -22,6 +37,7 @@ function Gallery() {
       <div className="absolute bottom-0 right-0 w-80 h-80 bg-yellow-500/10 blur-3xl rounded-full"></div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-10">
+
         {/* Heading */}
         <div className="text-center max-w-3xl mx-auto">
           <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-yellow-500/30 text-yellow-400 bg-white/5 text-sm mb-5">
@@ -40,15 +56,31 @@ function Gallery() {
           </p>
         </div>
 
-        {/* Grid */}
+        {/* Loading State */}
+        {loading && (
+          <p className="text-center mt-10 text-gray-400">
+            Loading gallery...
+          </p>
+        )}
+
+        {/* Empty State */}
+        {!loading && images.length === 0 && (
+          <p className="text-center mt-10 text-gray-400">
+            No images found 😕
+          </p>
+        )}
+
+        {/* GRID */}
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-16">
-          {images.map((img, index) => (
+
+          {images.map((item) => (
             <div
-              key={index}
+              key={item._id}
               className="group relative overflow-hidden rounded-3xl border border-white/10 hover:border-yellow-500/30 transition duration-300"
             >
+
               <img
-                src={img}
+                src={item.image}
                 alt="Gallery"
                 className="w-full h-72 object-cover group-hover:scale-110 transition duration-500"
               />
@@ -59,16 +91,19 @@ function Gallery() {
                   <Search size={22} />
                 </div>
               </div>
+
             </div>
           ))}
+
         </div>
 
-        {/* Bottom CTA */}
+        {/* CTA */}
         <div className="text-center mt-14">
           <button className="px-8 py-4 rounded-full bg-gradient-to-r from-red-800 to-yellow-500 font-semibold hover:scale-105 transition duration-300 shadow-lg">
             Visit Our Restaurant
           </button>
         </div>
+
       </div>
     </section>
   );
