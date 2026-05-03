@@ -1,20 +1,25 @@
 {
   "name": "Gunnu Chinese Corner",
   "short_name": "Gunnu",
-  "description": "Best Chinese food experience. Fresh, spicy & fast delivery.",
+  "description": "Authentic Chinese Food Experience • Fresh • Spicy • Fast Delivery",
+
   "start_url": "/",
+
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#facc15",
+
+  "background_color": "#000000",
+  "theme_color": "#8b0000",
+
   "orientation": "portrait",
+
   "icons": [
     {
-      "src": "/logo.png",
+      "src": "/logo2.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/logo.png",
+      "src": "/logo2.png",
       "sizes": "512x512",
       "type": "image/png"
     }
