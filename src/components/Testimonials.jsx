@@ -5,7 +5,7 @@ import { Star, Quote } from "lucide-react";
 function Testimonials() {
   const reviews = [
     {
-      name: "Rohit Sharma",
+      name: "Ritesh Mali",
       role: "Food Lover",
       image:
         "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=500&q=80",
@@ -13,7 +13,7 @@ function Testimonials() {
         "Best Chinese food I’ve had in Mumbai. Taste, quantity and quality everything was top class.",
     },
     {
-      name: "Priya Mehta",
+      name: "Khushi Mali",
       role: "Regular Customer",
       image:
         "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=500&q=80",
@@ -21,7 +21,7 @@ function Testimonials() {
         "Their momos and noodles are absolutely amazing. Fast delivery and always fresh food.",
     },
     {
-      name: "Aman Verma",
+      name: "Harsh Mali",
       role: "Food Blogger",
       image:
         "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=500&q=80",
