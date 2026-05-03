@@ -4,6 +4,9 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 
+/* 🔥 IMPORT LOGO */
+import logo from "../assets/images/logo.png"; // apna exact file name likhna
+
 function Navbar() {
   const [open, setOpen] = useState(false);
 
@@ -19,16 +22,14 @@ function Navbar() {
     <nav className="fixed top-0 left-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-yellow-600/20 shadow-lg">
       <div className="max-w-7xl mx-auto px-6 lg:px-10">
         <div className="flex items-center justify-between h-20">
-          
-          {/* Logo */}
-          <a href="#" className="select-none">
-            <h1 className="text-2xl md:text-3xl font-bold tracking-wide text-white">
-              Gunnu{" "}
-              <span className="text-yellow-500 drop-shadow-md">
-                Chinese
-              </span>{" "}
-              
-            </h1>
+
+          {/* 🔥 LOGO IMAGE */}
+          <a href="#" className="select-none flex items-center">
+            <img
+              src={logo}
+              alt="Gunnu Chinese Logo"
+              className="h-16 md:h-20 w-auto object-contain"
+            />
           </a>
 
           {/* Desktop Menu */}
@@ -47,13 +48,13 @@ function Navbar() {
 
           {/* Order Button */}
           <div className="hidden md:block">
-  <Link
-    to="/order"
-    className="px-5 py-2 rounded-full bg-gradient-to-r from-red-800 to-yellow-500 text-white font-semibold hover:scale-105 transition duration-300 shadow-lg inline-block"
-  >
-    Order Now
-  </Link>
-</div>
+            <Link
+              to="/order"
+              className="px-5 py-2 rounded-full bg-gradient-to-r from-red-800 to-yellow-500 text-white font-semibold hover:scale-105 transition duration-300 shadow-lg inline-block"
+            >
+              Order Now
+            </Link>
+          </div>
 
           {/* Mobile Menu Icon */}
           <button
@@ -85,11 +86,11 @@ function Navbar() {
           ))}
 
           <Link
-  to="/order"
-  className="inline-block mt-2 px-5 py-3 rounded-full bg-gradient-to-r from-red-800 to-yellow-500 text-white font-semibold shadow-lg hover:scale-105 transition duration-300"
->
-  Order Now
-</Link>
+            to="/order"
+            className="inline-block mt-2 px-5 py-3 rounded-full bg-gradient-to-r from-red-800 to-yellow-500 text-white font-semibold shadow-lg hover:scale-105 transition duration-300"
+          >
+            Order Now
+          </Link>
         </ul>
       </div>
     </nav>

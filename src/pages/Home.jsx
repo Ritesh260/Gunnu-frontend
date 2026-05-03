@@ -1,5 +1,3 @@
-// src/pages/Home.jsx
-
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
 import About from "../components/About";
@@ -11,9 +9,16 @@ import Contact from "../components/Contact";
 import Footer from "../components/Footer";
 import ScrollTop from "../components/ScrollTop";
 
+// 🔥 PWA INSTALL BANNER
+import InstallBanner from "../components/InstallBanner";
+
 function Home() {
   return (
     <div className="bg-black text-white overflow-x-hidden">
+      
+      {/* 🔥 Install App Popup */}
+      <InstallBanner />
+
       <Navbar />
 
       <main>
