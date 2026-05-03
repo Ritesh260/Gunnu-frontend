@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
 import About from "../components/About";
@@ -12,28 +14,40 @@ import ScrollTop from "../components/ScrollTop";
 // 🔥 PWA INSTALL BANNER
 import InstallBanner from "../components/InstallBanner";
 
+// 🔥 SPLASH SCREEN
+import SplashScreen from "../components/SplashScreen";
+
 function Home() {
+  const [loading, setLoading] = useState(true);
+
   return (
-    <div className="bg-black text-white overflow-x-hidden">
-      
-      {/* 🔥 Install App Popup */}
-      <InstallBanner />
+    <>
+      {/* 🔥 SPLASH SCREEN FIRST */}
+      {loading ? (
+        <SplashScreen onFinish={() => setLoading(false)} />
+      ) : (
+        <div className="bg-black text-white overflow-x-hidden">
 
-      <Navbar />
+          {/* 🔥 Install Banner */}
+          <InstallBanner />
 
-      <main>
-        <Hero />
-        <About />
-        <MenuPreview />
-        <Specials />
-        <Gallery />
-        <Testimonials />
-        <Contact />
-      </main>
+          <Navbar />
 
-      <Footer />
-      <ScrollTop />
-    </div>
+          <main>
+            <Hero />
+            <About />
+            <MenuPreview />
+            <Specials />
+            <Gallery />
+            <Testimonials />
+            <Contact />
+          </main>
+
+          <Footer />
+          <ScrollTop />
+        </div>
+      )}
+    </>
   );
 }
 
