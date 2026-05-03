@@ -11,10 +11,8 @@ import Contact from "../components/Contact";
 import Footer from "../components/Footer";
 import ScrollTop from "../components/ScrollTop";
 
-// 🔥 PWA INSTALL BANNER
-import InstallBanner from "../components/InstallBanner";
+// import InstallBanner from "../components/InstallBanner";
 
-// 🔥 SPLASH SCREEN
 import SplashScreen from "../components/SplashScreen";
 
 function Home() {
@@ -22,14 +20,14 @@ function Home() {
 
   return (
     <>
-      {/* 🔥 SPLASH SCREEN FIRST */}
+      
       {loading ? (
         <SplashScreen onFinish={() => setLoading(false)} />
       ) : (
         <div className="bg-black text-white overflow-x-hidden">
 
-          {/* 🔥 Install Banner */}
-          <InstallBanner />
+          
+          {/* <InstallBanner /> */}
 
           <Navbar />
 
