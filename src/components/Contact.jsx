@@ -67,7 +67,7 @@ function Contact() {
                 <div>
                   <h3 className="text-xl font-semibold">Phone</h3>
                   <p className="text-gray-400 mt-1">
-                    +91 98765 43210
+                    +91 1234567899
                   </p>
                 </div>
               </div>

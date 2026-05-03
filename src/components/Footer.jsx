@@ -91,7 +91,7 @@ function Footer() {
 
               <p className="flex gap-3">
                 <Phone size={18} className="text-red-600 mt-1" />
-                +91 98765 43210
+                +91 1234567899
               </p>
 
               <p className="flex gap-3">
