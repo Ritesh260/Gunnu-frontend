@@ -51,7 +51,7 @@ function About() {
                     {/* Left Image */}
                     <div className="relative">
                         <img
-                            src="https://images.unsplash.com/photo-1552566626-52f8b828add9?auto=format&fit=crop&w=900&q=80"
+                            src="/image.png"
                             alt="Restaurant"
                             className="rounded-3xl shadow-2xl w-full h-[520px] object-cover border border-yellow-500/20"
                         />

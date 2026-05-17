@@ -1,1 +1,26 @@
 @import "tailwindcss";
+@keyframes thankyou {
+
+  0% {
+    background-position: 200% center;
+  }
+
+  100% {
+    background-position: -200% center;
+  }
+
+}
+
+@keyframes popup {
+
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+}

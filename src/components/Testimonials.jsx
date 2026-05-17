@@ -189,12 +189,12 @@ function Testimonials() {
       if (form.image) formData.append("image", form.image);
 
       await axios.post(API, formData);
-      toast.success("Review submitted ⭐ Waiting for approval");
+      toast.success("Review submitted Waiting for approval");
       setShowModal(false);
       setForm({ name: "", role: "", review: "", rating: 5, image: null, preview: "" });
       fetchReviews();
     } catch {
-      toast.error("Something went wrong ❌");
+      toast.error("Something went wrong ");
     }
     setLoading(false);
   };
