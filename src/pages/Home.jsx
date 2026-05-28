@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
+import Certificate from "../components/Certificate"; // ✅ IMPORT ADDED
 import About from "../components/About";
 import MenuPreview from "../components/MenuPreview";
 import Specials from "../components/Specials";
@@ -20,29 +21,38 @@ function Home() {
 
   return (
     <>
-      
       {loading ? (
         <SplashScreen onFinish={() => setLoading(false)} />
       ) : (
         <div className="bg-black text-white overflow-x-hidden">
 
-          
           {/* <InstallBanner /> */}
 
           <Navbar />
 
           <main>
             <Hero />
+
             <About />
+
             <MenuPreview />
+
             <Specials />
+
             <Gallery />
+
             <Testimonials />
+
             <Contact />
           </main>
 
+            {/* ✅ CERTIFICATE SECTION */}
+            <Certificate />
+
           <Footer />
+
           <ScrollTop />
+
         </div>
       )}
     </>
