@@ -79,7 +79,6 @@ function MenuPreview() {
     }
   };
 
-  const isNonVeg = (type) => type === "nonveg" || type === "non-veg";
   const isVeg = (type) => type === "veg";
 
   const filtered = useMemo(() => {
@@ -156,7 +155,7 @@ function MenuPreview() {
           zIndex: 1,
         }}
       >
-        {/* ─── HEADING ─── */}
+        {/* HEADING */}
         <div style={{ textAlign: "center", marginBottom: 56 }}>
           <span
             style={{
@@ -199,7 +198,7 @@ function MenuPreview() {
           </p>
         </div>
 
-        {/* ─── CONTROLS ─── */}
+        {/* CONTROLS */}
         <div
           style={{
             display: "flex",
@@ -210,7 +209,6 @@ function MenuPreview() {
             marginBottom: 36,
           }}
         >
-          {/* Filter tabs */}
           <div
             style={{
               display: "flex",
@@ -247,8 +245,8 @@ function MenuPreview() {
                       ? tab.key === "veg"
                         ? "linear-gradient(135deg, #166534, #15803d)"
                         : tab.key === "nonveg"
-                        ? "linear-gradient(135deg, #991b1b, #b91c1c)"
-                        : "linear-gradient(135deg, #7c2d12, #c2410c)"
+                          ? "linear-gradient(135deg, #991b1b, #b91c1c)"
+                          : "linear-gradient(135deg, #7c2d12, #c2410c)"
                       : "transparent",
                     color: active ? "#fff" : "#9ca3af",
                     boxShadow: active ? "0 2px 12px rgba(0,0,0,0.3)" : "none",
@@ -271,7 +269,6 @@ function MenuPreview() {
             })}
           </div>
 
-          {/* Search */}
           <div style={{ position: "relative", flexShrink: 0 }}>
             <Search
               size={15}
@@ -307,7 +304,7 @@ function MenuPreview() {
           </div>
         </div>
 
-        {/* ─── LOADING ─── */}
+        {/* LOADING */}
         {loading && (
           <div style={{ textAlign: "center", padding: "80px 0" }}>
             <div
@@ -326,7 +323,7 @@ function MenuPreview() {
           </div>
         )}
 
-        {/* ─── EMPTY ─── */}
+        {/* EMPTY */}
         {!loading && filtered.length === 0 && (
           <div style={{ textAlign: "center", padding: "80px 0", color: "#6b7280" }}>
             <UtensilsCrossed size={40} style={{ margin: "0 auto 16px", opacity: 0.4 }} />
@@ -337,7 +334,7 @@ function MenuPreview() {
           </div>
         )}
 
-        {/* ─── GRID ─── */}
+        {/* GRID */}
         {!loading && paginated.length > 0 && (
           <div
             style={{
@@ -383,7 +380,6 @@ function MenuPreview() {
                     onMouseEnter={(e) => (e.target.style.transform = "scale(1.07)")}
                     onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
                   />
-                  {/* Tag */}
                   <span
                     style={{
                       position: "absolute",
@@ -401,7 +397,6 @@ function MenuPreview() {
                   >
                     {item.tag || "Popular"}
                   </span>
-                  {/* Veg/NonVeg badge corner */}
                   <span
                     style={{
                       position: "absolute",
@@ -430,32 +425,15 @@ function MenuPreview() {
 
                 {/* Content */}
                 <div style={{ padding: "18px 20px 20px" }}>
-                  {/* Name + Price */}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-                    <h3
-                      style={{
-                        fontSize: 17,
-                        fontWeight: 700,
-                        margin: 0,
-                        lineHeight: 1.3,
-                        flex: 1,
-                      }}
-                    >
+                    <h3 style={{ fontSize: 17, fontWeight: 700, margin: 0, lineHeight: 1.3, flex: 1 }}>
                       {item.name}
                     </h3>
-                    <span
-                      style={{
-                        fontSize: 18,
-                        fontWeight: 700,
-                        color: "#f59e0b",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <span style={{ fontSize: 18, fontWeight: 700, color: "#f59e0b", whiteSpace: "nowrap" }}>
                       ₹{item.price}
                     </span>
                   </div>
 
-                  {/* Veg label + Rating row */}
                   <div
                     style={{
                       display: "flex",
@@ -468,7 +446,6 @@ function MenuPreview() {
                     <StarRating rating={item.rating || 5} />
                   </div>
 
-                  {/* Description */}
                   <p
                     style={{
                       color: "#9ca3af",
@@ -485,7 +462,6 @@ function MenuPreview() {
                     {item.description || "Fresh ingredients, premium sauces and perfect flavor in every bite."}
                   </p>
 
-                  {/* Divider */}
                   <div
                     style={{
                       borderTop: "1px solid rgba(255,255,255,0.07)",
@@ -493,8 +469,10 @@ function MenuPreview() {
                       paddingTop: 16,
                     }}
                   >
+                    {/* ✅ FIX: key changed to selectedMenuItem to match Order.jsx */}
                     <Link
                       to="/order"
+                      state={{ selectedMenuItem: item }}
                       style={{
                         display: "flex",
                         alignItems: "center",
@@ -509,15 +487,6 @@ function MenuPreview() {
                         fontSize: 14,
                         textDecoration: "none",
                         letterSpacing: "0.03em",
-                        transition: "opacity 0.2s, transform 0.2s",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.opacity = "0.85";
-                        e.currentTarget.style.transform = "scale(1.02)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.opacity = "1";
-                        e.currentTarget.style.transform = "scale(1)";
                       }}
                     >
                       <ShoppingCart size={16} />
@@ -530,7 +499,7 @@ function MenuPreview() {
           </div>
         )}
 
-        {/* ─── PAGINATION ─── */}
+        {/* PAGINATION */}
         {!loading && totalPages > 1 && (
           <div
             style={{
@@ -554,7 +523,6 @@ function MenuPreview() {
                 fontWeight: 600,
                 fontSize: 13,
                 cursor: page === 1 ? "not-allowed" : "pointer",
-                transition: "background 0.2s",
               }}
             >
               ← Prev
@@ -578,7 +546,6 @@ function MenuPreview() {
                   fontWeight: pg === page ? 700 : 400,
                   fontSize: 14,
                   cursor: "pointer",
-                  transition: "all 0.2s",
                 }}
               >
                 {pg}
@@ -605,7 +572,6 @@ function MenuPreview() {
           </div>
         )}
 
-        {/* ─── RESULT COUNT ─── */}
         {!loading && filtered.length > 0 && (
           <p
             style={{

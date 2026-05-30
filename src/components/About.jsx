@@ -123,10 +123,13 @@ function About() {
 
                     {/* Founder Image */}
                     <div className="relative">
-                        <img
-                            src="/owner.jpeg" alt="Founder"
-                            className="rounded-3xl w-full h-[450px] object-cover border border-yellow-500/20"
-                        />
+                        <div className="relative bg-white/5 rounded-3xl border border-yellow-500/20 p-3">
+                            <img
+                                src="/owner.jpeg"
+                                alt="Founder"
+                                className="rounded-2xl w-full h-auto object-contain"
+                            />
+                        </div>
 
                         <div className="absolute top-5 left-5 bg-black/70 px-4 py-2 rounded-full border border-yellow-500/30 text-sm text-yellow-400">
                             Founder & Owner
