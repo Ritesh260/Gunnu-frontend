@@ -1,14 +1,34 @@
 import React, { useEffect, useState, useMemo } from "react";
 import axios from "axios";
-import { Star, ShoppingCart, Search, Leaf, Drumstick, UtensilsCrossed } from "lucide-react";
+import {
+  Star,
+  ShoppingCart,
+  Search,
+  Leaf,
+  Drumstick,
+  UtensilsCrossed,
+  ChevronDown,
+  X,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 const ITEMS_PER_PAGE = 9;
 
-const isNonVeg = (type) => type === "nonveg" || type === "non-veg";
+const MENU_API = "https://gunnu-dashboard.onrender.com/api/menu";
+const CATEGORY_API = "https://gunnu-dashboard.onrender.com/api/categories";
+
+const isNonVeg = (type) =>
+  type === "nonveg" || type === "non-veg";
+
+const isVeg = (type) => type === "veg";
+
+/* =========================================================
+   VEG / NON VEG DOT
+========================================================= */
 
 const VegDot = ({ type }) => {
   const nonVeg = isNonVeg(type);
+
   return (
     <span
       style={{
@@ -28,19 +48,33 @@ const VegDot = ({ type }) => {
           height: 10,
           borderRadius: "50%",
           background: nonVeg ? "#dc2626" : "#16a34a",
-          border: `1.5px solid ${nonVeg ? "#b91c1c" : "#15803d"}`,
+          border: `1.5px solid ${
+            nonVeg ? "#b91c1c" : "#15803d"
+          }`,
           flexShrink: 0,
         }}
       />
+
       {nonVeg ? "Non Veg" : "Veg"}
     </span>
   );
 };
 
+/* =========================================================
+   STAR RATING
+========================================================= */
+
 const StarRating = ({ rating = 5 }) => {
-  const filled = Math.round(rating);
+  const filled = Math.round(Number(rating));
+
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 3,
+      }}
+    >
       {[1, 2, 3, 4, 5].map((i) => (
         <Star
           key={i}
@@ -50,63 +84,278 @@ const StarRating = ({ rating = 5 }) => {
           strokeWidth={1.5}
         />
       ))}
-      <span style={{ fontSize: 12, color: "#9ca3af", marginLeft: 4 }}>
+
+      <span
+        style={{
+          fontSize: 12,
+          color: "#9ca3af",
+          marginLeft: 4,
+        }}
+      >
         {Number(rating).toFixed(1)}
       </span>
     </div>
   );
 };
 
+/* =========================================================
+   MENU PREVIEW
+========================================================= */
+
 function MenuPreview() {
   const [menuItems, setMenuItems] = useState([]);
+  const [categories, setCategories] = useState([]);
+
   const [loading, setLoading] = useState(true);
+  const [categoryLoading, setCategoryLoading] = useState(true);
+
   const [filter, setFilter] = useState("all");
+
+  // Selected category
+  const [selectedCategory, setSelectedCategory] = useState("");
+
+  // Search
   const [search, setSearch] = useState("");
+
+  // Pagination
   const [page, setPage] = useState(1);
+
+  /* =========================================================
+     FETCH MENU + CATEGORIES
+  ========================================================= */
 
   useEffect(() => {
     fetchMenu();
+    fetchCategories();
   }, []);
+
+  /* =========================================================
+     FETCH MENU
+  ========================================================= */
 
   const fetchMenu = async () => {
     try {
-      const res = await axios.get("https://gunnu-dashboard.onrender.com/api/menu");
-      setMenuItems(res.data);
+      const res = await axios.get(MENU_API);
+
+      /*
+        API agar direct array return karta hai:
+        res.data
+
+        Agar future me:
+        { success: true, data: [...] }
+
+        dono handle honge.
+      */
+
+      const items = Array.isArray(res.data)
+        ? res.data
+        : res.data?.data || [];
+
+      setMenuItems(items);
     } catch (error) {
-      console.log(error);
+      console.log("MENU FETCH ERROR:", error);
+      setMenuItems([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const isVeg = (type) => type === "veg";
+  /* =========================================================
+     FETCH CATEGORIES
+  ========================================================= */
+
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get(CATEGORY_API);
+
+      /*
+        Category API:
+
+        {
+          success: true,
+          data: [...]
+        }
+      */
+
+      const data = Array.isArray(res.data)
+        ? res.data
+        : res.data?.data || [];
+
+      setCategories(data);
+    } catch (error) {
+      console.log("CATEGORY FETCH ERROR:", error);
+      setCategories([]);
+    } finally {
+      setCategoryLoading(false);
+    }
+  };
+
+  /* =========================================================
+     GET CATEGORIES FOR CURRENT FILTER
+  ========================================================= */
+
+  const filteredCategories = useMemo(() => {
+    if (filter === "all") {
+      return [];
+    }
+
+    return categories.filter((category) => {
+      if (!category.active) {
+        return false;
+      }
+
+      /*
+        Veg:
+        type = veg
+        OR both
+
+        Non Veg:
+        type = non-veg
+        OR both
+      */
+
+      if (filter === "veg") {
+        return (
+          category.type === "veg" ||
+          category.type === "both"
+        );
+      }
+
+      if (filter === "nonveg") {
+        return (
+          category.type === "non-veg" ||
+          category.type === "both"
+        );
+      }
+
+      return false;
+    });
+  }, [categories, filter]);
+
+  /* =========================================================
+     FILTER MENU ITEMS
+  ========================================================= */
 
   const filtered = useMemo(() => {
     return menuItems.filter((item) => {
-      const matchType =
-        filter === "all" ||
-        (filter === "veg" && isVeg(item.type)) ||
-        (filter === "nonveg" && isNonVeg(item.type));
-      const matchSearch = item.name?.toLowerCase().includes(search.toLowerCase());
-      return matchType && matchSearch;
+      /* ================= TYPE FILTER ================= */
+
+      let matchType = true;
+
+      if (filter === "veg") {
+        matchType = isVeg(item.type);
+      }
+
+      if (filter === "nonveg") {
+        matchType = isNonVeg(item.type);
+      }
+
+      /* ================= CATEGORY FILTER ================= */
+
+      let matchCategory = true;
+
+      if (selectedCategory) {
+        matchCategory =
+          item.category?.trim().toLowerCase() ===
+          selectedCategory.trim().toLowerCase();
+      }
+
+      /* ================= SEARCH FILTER ================= */
+
+      const searchText = search.trim().toLowerCase();
+
+      const matchSearch =
+        !searchText ||
+        item.name?.toLowerCase().includes(searchText) ||
+        item.category?.toLowerCase().includes(searchText) ||
+        item.description?.toLowerCase().includes(searchText);
+
+      return (
+        matchType &&
+        matchCategory &&
+        matchSearch
+      );
     });
-  }, [menuItems, filter, search]);
+  }, [
+    menuItems,
+    filter,
+    selectedCategory,
+    search,
+  ]);
 
-  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
-  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+  /* =========================================================
+     PAGINATION
+  ========================================================= */
 
-  const vegCount = menuItems.filter((i) => isVeg(i.type)).length;
-  const nonVegCount = menuItems.filter((i) => isNonVeg(i.type)).length;
+  const totalPages = Math.ceil(
+    filtered.length / ITEMS_PER_PAGE
+  );
 
-  const handleFilterChange = (val) => {
-    setFilter(val);
+  const paginated = filtered.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE
+  );
+
+  /* =========================================================
+     COUNTS
+  ========================================================= */
+
+  const vegCount = menuItems.filter((item) =>
+    isVeg(item.type)
+  ).length;
+
+  const nonVegCount = menuItems.filter((item) =>
+    isNonVeg(item.type)
+  ).length;
+
+  /* =========================================================
+     FILTER CHANGE
+  ========================================================= */
+
+  const handleFilterChange = (value) => {
+    setFilter(value);
+
+    // Reset category whenever Veg/NonVeg/All changes
+    setSelectedCategory("");
+
+    // Reset page
     setPage(1);
   };
+
+  /* =========================================================
+     CATEGORY CHANGE
+  ========================================================= */
+
+  const handleCategoryChange = (e) => {
+    const value = e.target.value;
+
+    setSelectedCategory(value);
+
+    // Always go back to page 1
+    setPage(1);
+  };
+
+  /* =========================================================
+     SEARCH
+  ========================================================= */
 
   const handleSearch = (e) => {
     setSearch(e.target.value);
     setPage(1);
   };
+
+  /* =========================================================
+     CLEAR CATEGORY
+  ========================================================= */
+
+  const clearCategory = () => {
+    setSelectedCategory("");
+    setPage(1);
+  };
+
+  /* =========================================================
+     RETURN
+  ========================================================= */
 
   return (
     <section
@@ -120,7 +369,10 @@ function MenuPreview() {
         fontFamily: "'Sora', sans-serif",
       }}
     >
-      {/* Ambient glows */}
+      {/* =====================================================
+          AMBIENT GLOWS
+      ===================================================== */}
+
       <div
         style={{
           position: "absolute",
@@ -129,10 +381,12 @@ function MenuPreview() {
           width: 420,
           height: 420,
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(180,30,30,0.12) 0%, transparent 70%)",
+          background:
+            "radial-gradient(circle, rgba(180,30,30,0.12) 0%, transparent 70%)",
           pointerEvents: "none",
         }}
       />
+
       <div
         style={{
           position: "absolute",
@@ -141,7 +395,8 @@ function MenuPreview() {
           width: 380,
           height: 380,
           borderRadius: "50%",
-          background: "radial-gradient(circle, rgba(234,179,8,0.09) 0%, transparent 70%)",
+          background:
+            "radial-gradient(circle, rgba(234,179,8,0.09) 0%, transparent 70%)",
           pointerEvents: "none",
         }}
       />
@@ -155,16 +410,26 @@ function MenuPreview() {
           zIndex: 1,
         }}
       >
-        {/* HEADING */}
-        <div style={{ textAlign: "center", marginBottom: 56 }}>
+        {/* =====================================================
+            HEADING
+        ===================================================== */}
+
+        <div
+          style={{
+            textAlign: "center",
+            marginBottom: 56,
+          }}
+        >
           <span
             style={{
               display: "inline-block",
               padding: "6px 18px",
               borderRadius: 999,
-              border: "1px solid rgba(234,179,8,0.35)",
+              border:
+                "1px solid rgba(234,179,8,0.35)",
               color: "#fbbf24",
-              background: "rgba(255,255,255,0.04)",
+              background:
+                "rgba(255,255,255,0.04)",
               fontSize: 12,
               letterSpacing: "0.08em",
               textTransform: "uppercase",
@@ -174,6 +439,7 @@ function MenuPreview() {
           >
             Veg &amp; Non Veg Menu
           </span>
+
           <h2
             style={{
               fontSize: "clamp(28px, 4vw, 44px)",
@@ -185,413 +451,1010 @@ function MenuPreview() {
             Crafted With{" "}
             <span
               style={{
-                background: "linear-gradient(90deg, #ef4444, #f59e0b)",
+                background:
+                  "linear-gradient(90deg, #ef4444, #f59e0b)",
                 WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
+                WebkitTextFillColor:
+                  "transparent",
               }}
             >
               Passion
             </span>
           </h2>
-          <p style={{ color: "#9ca3af", maxWidth: 500, margin: "0 auto", lineHeight: 1.7, fontSize: 15 }}>
-            Premium veg &amp; non-veg Chinese dishes, made fresh with rich taste and unforgettable flavor.
+
+          <p
+            style={{
+              color: "#9ca3af",
+              maxWidth: 500,
+              margin: "0 auto",
+              lineHeight: 1.7,
+              fontSize: 15,
+            }}
+          >
+            Premium veg &amp; non-veg Chinese
+            dishes, made fresh with rich taste
+            and unforgettable flavor.
           </p>
         </div>
 
-        {/* CONTROLS */}
+        {/* =====================================================
+            CONTROLS
+        ===================================================== */}
+
         <div
           style={{
             display: "flex",
-            flexWrap: "wrap",
-            gap: 12,
-            alignItems: "center",
-            justifyContent: "space-between",
+            flexDirection: "column",
+            gap: 14,
             marginBottom: 36,
           }}
         >
+          {/* =================================================
+              TOP FILTER ROW
+          ================================================= */}
+
           <div
             style={{
               display: "flex",
-              gap: 8,
-              background: "rgba(255,255,255,0.05)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              borderRadius: 12,
-              padding: 4,
+              flexWrap: "wrap",
+              gap: 12,
+              alignItems: "center",
+              justifyContent: "space-between",
+             
             }}
           >
-            {[
-              { key: "all", label: "All", icon: <UtensilsCrossed size={14} />, count: menuItems.length },
-              { key: "veg", label: "Veg", icon: <Leaf size={14} />, count: vegCount },
-              { key: "nonveg", label: "Non Veg", icon: <Drumstick size={14} />, count: nonVegCount },
-            ].map((tab) => {
-              const active = filter === tab.key;
-              return (
+            {/* TYPE FILTER */}
+
+           <div
+  className="menu-type-filter"
+  style={{
+    display: "flex",
+    gap: 8,
+    background: "rgba(255,255,255,0.05)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: 12,
+    padding: 4,
+  }}
+>
+              {[
+                {
+                  key: "all",
+                  label: "All",
+                  // icon: (
+                  //   <UtensilsCrossed size={14} />
+                  // ),
+                  count: menuItems.length,
+                },
+                {
+                  key: "veg",
+                  label: "Veg",
+                  // icon: <Leaf size={14} />,
+                  count: vegCount,
+                },
+                {
+                  key: "nonveg",
+                  label: "Non Veg",
+                  // icon: (
+                  //   <Drumstick size={14} />
+                  // ),
+                  count: nonVegCount,
+                },
+              ].map((tab) => {
+                const active =
+                  filter === tab.key;
+
+                return (
+                  <button
+  key={tab.key}
+  className="menu-filter-tab"
+  onClick={() => handleFilterChange(tab.key)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 6,
+                      padding: "8px 16px",
+                      borderRadius: 9,
+                      border: "none",
+                      cursor: "pointer",
+                      fontSize: 13,
+                      fontWeight: 600,
+                      fontFamily:
+                        "'Sora', sans-serif",
+                      transition: "all 0.2s",
+                      background: active
+                        ? tab.key === "veg"
+                          ? "linear-gradient(135deg, #166534, #15803d)"
+                          : tab.key ===
+                            "nonveg"
+                          ? "linear-gradient(135deg, #991b1b, #b91c1c)"
+                          : "linear-gradient(135deg, #7c2d12, #c2410c)"
+                        : "transparent",
+                      color: active
+                        ? "#fff"
+                        : "#9ca3af",
+                      boxShadow: active
+                        ? "0 2px 12px rgba(0,0,0,0.3)"
+                        : "none",
+
+                        
+                        
+                    }}
+                  >
+                    {tab.icon}
+
+                    {tab.label}
+
+                    <span
+                      style={{
+                        background: active
+                          ? "rgba(255,255,255,0.2)"
+                          : "rgba(255,255,255,0.08)",
+                        borderRadius: 999,
+                        padding: "1px 7px",
+                        fontSize: 11,
+                      }}
+                    >
+                      {tab.count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* SEARCH */}
+
+            <div
+              style={{
+                position: "relative",
+                flexShrink: 0,
+              }}
+            >
+              <Search
+                size={15}
+                style={{
+                  position: "absolute",
+                  left: 12,
+                  top: "50%",
+                  transform:
+                    "translateY(-50%)",
+                  color: "#6b7280",
+                  pointerEvents: "none",
+                }}
+              />
+
+              <input
+                type="text"
+                placeholder="Search dishes..."
+                value={search}
+                onChange={handleSearch}
+                style={{
+                  background:
+                    "rgba(255,255,255,0.05)",
+                  border:
+                    "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 10,
+                  padding:
+                    "10px 14px 10px 36px",
+                  color: "#f3f4f6",
+                  fontSize: 13,
+                  fontFamily:
+                    "'Sora', sans-serif",
+                  width: 220,
+                  outline: "none",
+                  transition:
+                    "border-color 0.2s",
+                }}
+                onFocus={(e) =>
+                  (e.target.style.borderColor =
+                    "rgba(234,179,8,0.5)")
+                }
+                onBlur={(e) =>
+                  (e.target.style.borderColor =
+                    "rgba(255,255,255,0.1)")
+                }
+              />
+            </div>
+          </div>
+
+          {/* =================================================
+              CATEGORY DROPDOWN
+          ================================================= */}
+
+          {filter !== "all" && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                flexWrap: "wrap",
+              }}
+            >
+              <div
+                style={{
+                  position: "relative",
+                  minWidth: 260,
+                  flex: "0 1 320px",
+                }}
+              >
+                <select
+                  value={selectedCategory}
+                  onChange={handleCategoryChange}
+                  disabled={categoryLoading}
+                  style={{
+                    width: "100%",
+                    appearance: "none",
+                    background:
+                      "rgba(255,255,255,0.05)",
+                    border:
+                      filter === "veg"
+                        ? "1px solid rgba(34,197,94,0.3)"
+                        : "1px solid rgba(239,68,68,0.3)",
+                    borderRadius: 12,
+                    padding:
+                      "13px 44px 13px 16px",
+                    color: selectedCategory
+                      ? "#f9fafb"
+                      : "#9ca3af",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    fontFamily:
+                      "'Sora', sans-serif",
+                    outline: "none",
+                    cursor: categoryLoading
+                      ? "not-allowed"
+                      : "pointer",
+                  }}
+                >
+                  <option
+                    value=""
+                    style={{
+                      background: "#171717",
+                      color: "#9ca3af",
+                    }}
+                  >
+                    {categoryLoading
+                      ? "Loading categories..."
+                      : `Select ${
+                          filter === "veg"
+                            ? "Veg"
+                            : "Non Veg"
+                        } Category`}
+                  </option>
+
+                  {filteredCategories.map(
+                    (category) => (
+                      <option
+                        key={category._id}
+                        value={category.name}
+                        style={{
+                          background: "#171717",
+                          color: "#fff",
+                        }}
+                      >
+                        {category.name}
+                      </option>
+                    )
+                  )}
+                </select>
+
+                <ChevronDown
+                  size={17}
+                  style={{
+                    position: "absolute",
+                    right: 15,
+                    top: "50%",
+                    transform:
+                      "translateY(-50%)",
+                    color:
+                      filter === "veg"
+                        ? "#22c55e"
+                        : "#ef4444",
+                    pointerEvents: "none",
+                  }}
+                />
+              </div>
+
+              {/* CLEAR CATEGORY */}
+
+              {selectedCategory && (
                 <button
-                  key={tab.key}
-                  onClick={() => handleFilterChange(tab.key)}
+                  onClick={clearCategory}
                   style={{
                     display: "flex",
                     alignItems: "center",
                     gap: 6,
-                    padding: "8px 16px",
-                    borderRadius: 9,
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: 13,
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    background:
+                      "rgba(255,255,255,0.05)",
+                    color: "#9ca3af",
+                    borderRadius: 10,
+                    padding:
+                      "10px 14px",
+                    fontFamily:
+                      "'Sora', sans-serif",
+                    fontSize: 12,
                     fontWeight: 600,
-                    fontFamily: "'Sora', sans-serif",
-                    transition: "all 0.2s",
-                    background: active
-                      ? tab.key === "veg"
-                        ? "linear-gradient(135deg, #166534, #15803d)"
-                        : tab.key === "nonveg"
-                          ? "linear-gradient(135deg, #991b1b, #b91c1c)"
-                          : "linear-gradient(135deg, #7c2d12, #c2410c)"
-                      : "transparent",
-                    color: active ? "#fff" : "#9ca3af",
-                    boxShadow: active ? "0 2px 12px rgba(0,0,0,0.3)" : "none",
+                    cursor: "pointer",
                   }}
                 >
-                  {tab.icon}
-                  {tab.label}
-                  <span
-                    style={{
-                      background: active ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.08)",
-                      borderRadius: 999,
-                      padding: "1px 7px",
-                      fontSize: 11,
-                    }}
-                  >
-                    {tab.count}
-                  </span>
+                  <X size={14} />
+                  Clear Category
                 </button>
-              );
-            })}
-          </div>
+              )}
+            </div>
+          )}
 
-          <div style={{ position: "relative", flexShrink: 0 }}>
-            <Search
-              size={15}
-              style={{
-                position: "absolute",
-                left: 12,
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "#6b7280",
-                pointerEvents: "none",
-              }}
-            />
-            <input
-              type="text"
-              placeholder="Search dishes..."
-              value={search}
-              onChange={handleSearch}
-              style={{
-                background: "rgba(255,255,255,0.05)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: 10,
-                padding: "10px 14px 10px 36px",
-                color: "#f3f4f6",
-                fontSize: 13,
-                fontFamily: "'Sora', sans-serif",
-                width: 220,
-                outline: "none",
-                transition: "border-color 0.2s",
-              }}
-              onFocus={(e) => (e.target.style.borderColor = "rgba(234,179,8,0.5)")}
-              onBlur={(e) => (e.target.style.borderColor = "rgba(255,255,255,0.1)")}
-            />
-          </div>
+          {/* =================================================
+              SELECTED CATEGORY INFO
+          ================================================= */}
+
+          {filter !== "all" &&
+            selectedCategory && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  fontSize: 13,
+                  color: "#9ca3af",
+                }}
+              >
+                <span>
+                  Showing
+                </span>
+
+                <span
+                  style={{
+                    padding: "5px 10px",
+                    borderRadius: 999,
+                    background:
+                      filter === "veg"
+                        ? "rgba(34,197,94,0.12)"
+                        : "rgba(239,68,68,0.12)",
+                    border:
+                      filter === "veg"
+                        ? "1px solid rgba(34,197,94,0.25)"
+                        : "1px solid rgba(239,68,68,0.25)",
+                    color:
+                      filter === "veg"
+                        ? "#4ade80"
+                        : "#f87171",
+                    fontWeight: 700,
+                  }}
+                >
+                  {filter === "veg"
+                    ? "Veg"
+                    : "Non Veg"}
+                </span>
+
+                <span>→</span>
+
+                <span
+                  style={{
+                    padding: "5px 10px",
+                    borderRadius: 999,
+                    background:
+                      "rgba(234,179,8,0.1)",
+                    border:
+                      "1px solid rgba(234,179,8,0.2)",
+                    color: "#fbbf24",
+                    fontWeight: 700,
+                  }}
+                >
+                  {selectedCategory}
+                </span>
+
+                <span>
+                  ({filtered.length} items)
+                </span>
+              </div>
+            )}
         </div>
 
-        {/* LOADING */}
+        {/* =====================================================
+            LOADING
+        ===================================================== */}
+
         {loading && (
-          <div style={{ textAlign: "center", padding: "80px 0" }}>
+          <div
+            style={{
+              textAlign: "center",
+              padding: "80px 0",
+            }}
+          >
             <div
               style={{
                 width: 40,
                 height: 40,
-                border: "3px solid rgba(255,255,255,0.1)",
-                borderTop: "3px solid #f59e0b",
+                border:
+                  "3px solid rgba(255,255,255,0.1)",
+                borderTop:
+                  "3px solid #f59e0b",
                 borderRadius: "50%",
-                margin: "0 auto 16px",
-                animation: "spin 0.8s linear infinite",
+                margin:
+                  "0 auto 16px",
+                animation:
+                  "spin 0.8s linear infinite",
               }}
             />
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-            <p style={{ color: "#6b7280", fontSize: 14 }}>Loading menu...</p>
+
+            <style>
+              {`
+                @keyframes spin {
+                  to {
+                    transform: rotate(360deg);
+                  }
+                }
+              `}
+            </style>
+
+            <p
+              style={{
+                color: "#6b7280",
+                fontSize: 14,
+              }}
+            >
+              Loading menu...
+            </p>
           </div>
         )}
 
-        {/* EMPTY */}
-        {!loading && filtered.length === 0 && (
-          <div style={{ textAlign: "center", padding: "80px 0", color: "#6b7280" }}>
-            <UtensilsCrossed size={40} style={{ margin: "0 auto 16px", opacity: 0.4 }} />
-            <h3 style={{ fontWeight: 600, fontSize: 18, color: "#f3f4f6", marginBottom: 8 }}>
-              No dishes found
-            </h3>
-            <p style={{ fontSize: 14 }}>Try a different search or filter.</p>
-          </div>
-        )}
+        {/* =====================================================
+            EMPTY
+        ===================================================== */}
 
-        {/* GRID */}
-        {!loading && paginated.length > 0 && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-              gap: 24,
-            }}
-          >
-            {paginated.map((item) => (
-              <div
-                key={item._id}
+        {!loading &&
+          filtered.length === 0 && (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "80px 0",
+                color: "#6b7280",
+              }}
+            >
+              <UtensilsCrossed
+                size={40}
                 style={{
-                  background: "rgba(255,255,255,0.03)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: 20,
-                  overflow: "hidden",
-                  transition: "transform 0.25s, border-color 0.25s, box-shadow 0.25s",
-                  cursor: "default",
+                  margin:
+                    "0 auto 16px",
+                  opacity: 0.4,
                 }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-4px)";
-                  e.currentTarget.style.borderColor = "rgba(234,179,8,0.3)";
-                  e.currentTarget.style.boxShadow = "0 16px 40px rgba(0,0,0,0.4)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)";
-                  e.currentTarget.style.boxShadow = "none";
+              />
+
+              <h3
+                style={{
+                  fontWeight: 600,
+                  fontSize: 18,
+                  color: "#f3f4f6",
+                  marginBottom: 8,
                 }}
               >
-                {/* Image */}
-                <div style={{ position: "relative", overflow: "hidden" }}>
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    style={{
-                      width: "100%",
-                      height: 200,
-                      objectFit: "cover",
-                      display: "block",
-                      transition: "transform 0.5s",
-                    }}
-                    onMouseEnter={(e) => (e.target.style.transform = "scale(1.07)")}
-                    onMouseLeave={(e) => (e.target.style.transform = "scale(1)")}
-                  />
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: 12,
-                      left: 12,
-                      padding: "4px 12px",
-                      borderRadius: 999,
-                      fontSize: 11,
-                      fontWeight: 700,
-                      letterSpacing: "0.05em",
-                      textTransform: "uppercase",
-                      background: "linear-gradient(90deg, #7f1d1d, #ca8a04)",
-                      color: "#fff",
-                    }}
-                  >
-                    {item.tag || "Popular"}
-                  </span>
-                  <span
-                    style={{
-                      position: "absolute",
-                      top: 12,
-                      right: 12,
-                      width: 24,
-                      height: 24,
-                      borderRadius: 4,
-                      background: "#0a0a0a",
-                      border: `2px solid ${isNonVeg(item.type) ? "#dc2626" : "#16a34a"}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <span
-                      style={{
-                        width: 10,
-                        height: 10,
-                        borderRadius: "50%",
-                        background: isNonVeg(item.type) ? "#dc2626" : "#16a34a",
-                      }}
-                    />
-                  </span>
-                </div>
+                No dishes found
+              </h3>
 
-                {/* Content */}
-                <div style={{ padding: "18px 20px 20px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-                    <h3 style={{ fontSize: 17, fontWeight: 700, margin: 0, lineHeight: 1.3, flex: 1 }}>
-                      {item.name}
-                    </h3>
-                    <span style={{ fontSize: 18, fontWeight: 700, color: "#f59e0b", whiteSpace: "nowrap" }}>
-                      ₹{item.price}
-                    </span>
-                  </div>
+              <p
+                style={{
+                  fontSize: 14,
+                }}
+              >
+                {selectedCategory
+                  ? `No ${filter === "veg"
+                      ? "veg"
+                      : "non veg"
+                    } dishes found in ${selectedCategory}.`
+                  : "Try a different search or filter."}
+              </p>
+            </div>
+          )}
+
+        {/* =====================================================
+            GRID
+        ===================================================== */}
+
+        {!loading &&
+          paginated.length > 0 && (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns:
+                  "repeat(auto-fill, minmax(300px, 1fr))",
+                gap: 24,
+              }}
+            >
+              {paginated.map((item) => (
+                <div
+                  key={item._id}
+                  style={{
+                    background:
+                      "rgba(255,255,255,0.03)",
+                    border:
+                      "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: 20,
+                    overflow: "hidden",
+                    transition:
+                      "transform 0.25s, border-color 0.25s, box-shadow 0.25s",
+                    cursor: "default",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform =
+                      "translateY(-4px)";
+                    e.currentTarget.style.borderColor =
+                      "rgba(234,179,8,0.3)";
+                    e.currentTarget.style.boxShadow =
+                      "0 16px 40px rgba(0,0,0,0.4)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform =
+                      "translateY(0)";
+                    e.currentTarget.style.borderColor =
+                      "rgba(255,255,255,0.08)";
+                    e.currentTarget.style.boxShadow =
+                      "none";
+                  }}
+                >
+                  {/* =================================================
+                      IMAGE
+                  ================================================= */}
 
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      marginTop: 10,
-                    }}
-                  >
-                    <VegDot type={item.type} />
-                    <StarRating rating={item.rating || 5} />
-                  </div>
-
-                  <p
-                    style={{
-                      color: "#9ca3af",
-                      fontSize: 13,
-                      lineHeight: 1.65,
-                      marginTop: 12,
-                      marginBottom: 0,
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
+                      position: "relative",
                       overflow: "hidden",
                     }}
                   >
-                    {item.description || "Fresh ingredients, premium sauces and perfect flavor in every bite."}
-                  </p>
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      style={{
+                        width: "100%",
+                        height: 200,
+                        objectFit: "cover",
+                        display: "block",
+                        transition:
+                          "transform 0.5s",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.target.style.transform =
+                          "scale(1.07)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.target.style.transform =
+                          "scale(1)")
+                      }
+                    />
+
+                    {/* TAG */}
+
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: 12,
+                        left: 12,
+                        padding:
+                          "4px 12px",
+                        borderRadius: 999,
+                        fontSize: 11,
+                        fontWeight: 700,
+                        letterSpacing:
+                          "0.05em",
+                        textTransform:
+                          "uppercase",
+                        background:
+                          "linear-gradient(90deg, #7f1d1d, #ca8a04)",
+                        color: "#fff",
+                      }}
+                    >
+                      {item.tag ||
+                        "Popular"}
+                    </span>
+
+                    {/* VEG DOT */}
+
+                    <span
+                      style={{
+                        position: "absolute",
+                        top: 12,
+                        right: 12,
+                        width: 24,
+                        height: 24,
+                        borderRadius: 4,
+                        background:
+                          "#0a0a0a",
+                        border: `2px solid ${
+                          isNonVeg(item.type)
+                            ? "#dc2626"
+                            : "#16a34a"
+                        }`,
+                        display: "flex",
+                        alignItems:
+                          "center",
+                        justifyContent:
+                          "center",
+                      }}
+                    >
+                      <span
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius:
+                            "50%",
+                          background:
+                            isNonVeg(
+                              item.type
+                            )
+                              ? "#dc2626"
+                              : "#16a34a",
+                        }}
+                      />
+                    </span>
+                  </div>
+
+                  {/* =================================================
+                      CONTENT
+                  ================================================= */}
 
                   <div
                     style={{
-                      borderTop: "1px solid rgba(255,255,255,0.07)",
-                      marginTop: 16,
-                      paddingTop: 16,
+                      padding:
+                        "18px 20px 20px",
                     }}
                   >
-                    {/* ✅ FIX: key changed to selectedMenuItem to match Order.jsx */}
-                    <Link
-                      to="/order"
-                      state={{ selectedMenuItem: item }}
+                    <div
                       style={{
                         display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        justifyContent:
+                          "space-between",
+                        alignItems:
+                          "flex-start",
                         gap: 8,
-                        width: "100%",
-                        padding: "11px 0",
-                        borderRadius: 12,
-                        background: "linear-gradient(90deg, #7f1d1d, #ca8a04)",
-                        color: "#fff",
-                        fontWeight: 700,
-                        fontSize: 14,
-                        textDecoration: "none",
-                        letterSpacing: "0.03em",
                       }}
                     >
-                      <ShoppingCart size={16} />
-                      Order Now
-                    </Link>
+                      <h3
+                        style={{
+                          fontSize: 17,
+                          fontWeight: 700,
+                          margin: 0,
+                          lineHeight: 1.3,
+                          flex: 1,
+                        }}
+                      >
+                        {item.name}
+                      </h3>
+
+                      {/* PRICE */}
+
+                      <div
+                        style={{
+                          textAlign: "right",
+                          whiteSpace:
+                            "nowrap",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontSize: 16,
+                            fontWeight: 700,
+                            color: "#f59e0b",
+                          }}
+                        >
+                          ₹
+                          {item.price?.full ||
+                            item.price ||
+                            0}
+                        </div>
+
+                        {item.price?.half && (
+                          <div
+                            style={{
+                              fontSize: 11,
+                              color: "#9ca3af",
+                              marginTop: 2,
+                            }}
+                          >
+                            Half ₹
+                            {
+                              item.price
+                                .half
+                            }
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* TYPE + RATING */}
+
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems:
+                          "center",
+                        justifyContent:
+                          "space-between",
+                        marginTop: 10,
+                      }}
+                    >
+                      <VegDot
+                        type={item.type}
+                      />
+
+                      <StarRating
+                        rating={
+                          item.rating || 5
+                        }
+                      />
+                    </div>
+
+                    {/* DESCRIPTION */}
+
+                    <p
+                      style={{
+                        color: "#9ca3af",
+                        fontSize: 13,
+                        lineHeight: 1.65,
+                        marginTop: 12,
+                        marginBottom: 0,
+                        display:
+                          "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient:
+                          "vertical",
+                        overflow:
+                          "hidden",
+                      }}
+                    >
+                      {item.description ||
+                        "Fresh ingredients, premium sauces and perfect flavor in every bite."}
+                    </p>
+
+                    {/* CATEGORY */}
+
+                    <div
+                      style={{
+                        marginTop: 10,
+                        fontSize: 11,
+                        color: "#6b7280",
+                      }}
+                    >
+                      {item.category}
+                    </div>
+
+                    {/* ORDER */}
+
+                    <div
+                      style={{
+                        borderTop:
+                          "1px solid rgba(255,255,255,0.07)",
+                        marginTop: 16,
+                        paddingTop: 16,
+                      }}
+                    >
+                      <Link
+                        to="/order"
+                        state={{
+                          selectedMenuItem:
+                            item,
+                        }}
+                        style={{
+                          display: "flex",
+                          alignItems:
+                            "center",
+                          justifyContent:
+                            "center",
+                          gap: 8,
+                          width: "100%",
+                          padding:
+                            "11px 0",
+                          borderRadius: 12,
+                          background:
+                            "linear-gradient(90deg, #7f1d1d, #ca8a04)",
+                          color: "#fff",
+                          fontWeight: 700,
+                          fontSize: 14,
+                          textDecoration:
+                            "none",
+                          letterSpacing:
+                            "0.03em",
+                        }}
+                      >
+                        <ShoppingCart
+                          size={16}
+                        />
+                        Order Now
+                      </Link>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
 
-        {/* PAGINATION */}
-        {!loading && totalPages > 1 && (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: 8,
-              marginTop: 52,
-            }}
-          >
-            <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={page === 1}
+        {/* =====================================================
+            PAGINATION
+        ===================================================== */}
+
+        {!loading &&
+          totalPages > 1 && (
+            <div
               style={{
-                padding: "8px 18px",
-                borderRadius: 10,
-                border: "1px solid rgba(255,255,255,0.12)",
-                background: "rgba(255,255,255,0.05)",
-                color: page === 1 ? "#4b5563" : "#f3f4f6",
-                fontFamily: "'Sora', sans-serif",
-                fontWeight: 600,
-                fontSize: 13,
-                cursor: page === 1 ? "not-allowed" : "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent:
+                  "center",
+                gap: 8,
+                marginTop: 52,
+                flexWrap: "wrap",
               }}
             >
-              ← Prev
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((pg) => (
               <button
-                key={pg}
-                onClick={() => setPage(pg)}
+                onClick={() =>
+                  setPage((p) =>
+                    Math.max(1, p - 1)
+                  )
+                }
+                disabled={page === 1}
                 style={{
-                  width: 38,
-                  height: 38,
+                  padding:
+                    "8px 18px",
                   borderRadius: 10,
-                  border: pg === page ? "none" : "1px solid rgba(255,255,255,0.1)",
+                  border:
+                    "1px solid rgba(255,255,255,0.12)",
                   background:
-                    pg === page
-                      ? "linear-gradient(135deg, #7f1d1d, #ca8a04)"
-                      : "rgba(255,255,255,0.04)",
-                  color: pg === page ? "#fff" : "#9ca3af",
-                  fontFamily: "'Sora', sans-serif",
-                  fontWeight: pg === page ? 700 : 400,
-                  fontSize: 14,
-                  cursor: "pointer",
+                    "rgba(255,255,255,0.05)",
+                  color:
+                    page === 1
+                      ? "#4b5563"
+                      : "#f3f4f6",
+                  fontFamily:
+                    "'Sora', sans-serif",
+                  fontWeight: 600,
+                  fontSize: 13,
+                  cursor:
+                    page === 1
+                      ? "not-allowed"
+                      : "pointer",
                 }}
               >
-                {pg}
+                ← Prev
               </button>
-            ))}
 
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={page === totalPages}
+              {Array.from(
+                {
+                  length: totalPages,
+                },
+                (_, i) => i + 1
+              ).map((pg) => (
+                <button
+                  key={pg}
+                  onClick={() =>
+                    setPage(pg)
+                  }
+                  style={{
+                    width: 38,
+                    height: 38,
+                    borderRadius: 10,
+                    border:
+                      pg === page
+                        ? "none"
+                        : "1px solid rgba(255,255,255,0.1)",
+                    background:
+                      pg === page
+                        ? "linear-gradient(135deg, #7f1d1d, #ca8a04)"
+                        : "rgba(255,255,255,0.04)",
+                    color:
+                      pg === page
+                        ? "#fff"
+                        : "#9ca3af",
+                    fontFamily:
+                      "'Sora', sans-serif",
+                    fontWeight:
+                      pg === page
+                        ? 700
+                        : 400,
+                    fontSize: 14,
+                    cursor:
+                      "pointer",
+                  }}
+                >
+                  {pg}
+                </button>
+              ))}
+
+              <button
+                onClick={() =>
+                  setPage((p) =>
+                    Math.min(
+                      totalPages,
+                      p + 1
+                    )
+                  )
+                }
+                disabled={
+                  page === totalPages
+                }
+                style={{
+                  padding:
+                    "8px 18px",
+                  borderRadius: 10,
+                  border:
+                    "1px solid rgba(255,255,255,0.12)",
+                  background:
+                    "rgba(255,255,255,0.05)",
+                  color:
+                    page === totalPages
+                      ? "#4b5563"
+                      : "#f3f4f6",
+                  fontFamily:
+                    "'Sora', sans-serif",
+                  fontWeight: 600,
+                  fontSize: 13,
+                  cursor:
+                    page === totalPages
+                      ? "not-allowed"
+                      : "pointer",
+                }}
+              >
+                Next →
+              </button>
+            </div>
+          )}
+
+        {/* =====================================================
+            SHOWING COUNT
+        ===================================================== */}
+
+        {!loading &&
+          filtered.length > 0 && (
+            <p
               style={{
-                padding: "8px 18px",
-                borderRadius: 10,
-                border: "1px solid rgba(255,255,255,0.12)",
-                background: "rgba(255,255,255,0.05)",
-                color: page === totalPages ? "#4b5563" : "#f3f4f6",
-                fontFamily: "'Sora', sans-serif",
-                fontWeight: 600,
-                fontSize: 13,
-                cursor: page === totalPages ? "not-allowed" : "pointer",
+                textAlign: "center",
+                color: "#4b5563",
+                fontSize: 12,
+                marginTop: 20,
+                letterSpacing:
+                  "0.04em",
               }}
             >
-              Next →
-            </button>
-          </div>
-        )}
-
-        {!loading && filtered.length > 0 && (
-          <p
-            style={{
-              textAlign: "center",
-              color: "#4b5563",
-              fontSize: 12,
-              marginTop: 20,
-              letterSpacing: "0.04em",
-            }}
-          >
-            Showing {Math.min((page - 1) * ITEMS_PER_PAGE + 1, filtered.length)}–
-            {Math.min(page * ITEMS_PER_PAGE, filtered.length)} of {filtered.length} items
-          </p>
-        )}
+              Showing{" "}
+              {Math.min(
+                (page - 1) *
+                  ITEMS_PER_PAGE +
+                  1,
+                filtered.length
+              )}
+              –
+              {Math.min(
+                page *
+                  ITEMS_PER_PAGE,
+                filtered.length
+              )}{" "}
+              of {filtered.length} items
+            </p>
+          )}
       </div>
 
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap');
-        * { box-sizing: border-box; }
-      `}</style>
+      {/* =====================================================
+          GLOBAL STYLE
+      ===================================================== */}
+
+      <style>
+        {`
+          @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap');
+
+          * {
+            box-sizing: border-box;
+          }
+
+          select option {
+            padding: 10px;
+          }
+
+          @keyframes spin {
+            to {
+              transform: rotate(360deg);
+            }
+          }
+        `}
+      </style>
     </section>
   );
 }
