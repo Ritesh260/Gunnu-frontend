@@ -1123,42 +1123,38 @@ function MenuPreview() {
 
                       {/* PRICE */}
 
-                      <div
-                        style={{
-                          textAlign: "right",
-                          whiteSpace:
-                            "nowrap",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: 16,
-                            fontWeight: 700,
-                            color: "#f59e0b",
-                          }}
-                        >
-                          ₹
-                          {item.price?.full ||
-                            item.price ||
-                            0}
-                        </div>
+                     <div
+  style={{
+    textAlign: "right",
+    whiteSpace: "nowrap",
+  }}
+>
+  {/* FULL PRICE */}
+  <div
+    style={{
+      fontSize: 16,
+      fontWeight: 700,
+      color: "#f59e0b",
+    }}
+  >
+    ₹{item.price?.full ?? item.price ?? 0}
+  </div>
 
-                        {item.price?.half && (
-                          <div
-                            style={{
-                              fontSize: 11,
-                              color: "#9ca3af",
-                              marginTop: 2,
-                            }}
-                          >
-                            Half ₹
-                            {
-                              item.price
-                                .half
-                            }
-                          </div>
-                        )}
-                      </div>
+  {/* HALF PRICE - ONLY IF BACKEND HAS IT */}
+  {item.price?.half !== undefined &&
+    item.price?.half !== null &&
+    item.price?.half !== "" && (
+      <div
+        style={{
+          fontSize: 11,
+          color: "#9ca3af",
+          marginTop: 2,
+        }}
+      >
+        Half ₹{item.price.half}
+      </div>
+    )}
+</div>
                     </div>
 
                     {/* TYPE + RATING */}
