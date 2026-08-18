@@ -1,0 +1,5 @@
+import { ArrowLeft, Sparkles } from "lucide-react";
+
+export default function OrderHeader({ onBack }) {
+    return <><div className="order-section flex justify-end mb-8"><button type="button" onClick={onBack} className="group flex items-center gap-2 text-sm text-gray-500 hover:text-white transition-colors"><span className="w-8 h-8 rounded-full border border-white/10 group-hover:border-white/30 flex items-center justify-center"><ArrowLeft size={14} /></span>Back</button></div><div className="order-section text-center mb-10 sm:mb-14"><div className="inline-flex items-center gap-2 border border-yellow-500/20 bg-yellow-500/5 text-yellow-500 text-[10px] sm:text-xs tracking-[.15em] uppercase px-3 sm:px-4 py-2 rounded-full mb-5"><Sparkles size={11} />Place Your Order</div><h1 className="order-title text-5xl md:text-7xl font-bold leading-[1.08] tracking-tight">Order From <span className="text-yellow-500">Gunnu</span><br /><span className="text-red-700">Chinese Corner</span></h1><p className="text-gray-600 mt-4 text-xs sm:text-sm max-w-sm mx-auto leading-relaxed px-4">Hot &amp; fresh Chinese food delivered straight to your doorstep.</p></div></>;
+}

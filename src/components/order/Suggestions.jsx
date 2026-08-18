@@ -1,0 +1,6 @@
+import { Plus, Sparkles } from "lucide-react";
+
+export default function Suggestions({ items, getFullPrice, onAdd, loading }) {
+    if (loading || !items.length) return null;
+    return <div className="rounded-2xl p-4 sm:p-5 border border-white/[.07]" style={{ background: "#111" }}><div className="flex items-center gap-2 mb-4"><Sparkles size={13} className="text-yellow-500" /><span className="text-xs font-semibold tracking-widest uppercase text-gray-500">You might also like</span></div><div className="space-y-2.5">{items.map((item) => <div key={item._id || item.id || item.name} className="suggest-item flex items-center gap-3 p-3 rounded-xl border border-white/[.06]"><img src={item.image || "https://via.placeholder.com/80"} alt={item.name} className="w-12 h-12 rounded-xl object-cover flex-shrink-0" /><div className="flex-1 min-w-0"><p className="text-sm font-semibold truncate">{item.name}</p><p className="text-xs text-gray-600 mt-0.5 line-clamp-1">{item.description || "Wok-tossed with authentic flavours"}</p><p className="text-yellow-500 text-sm font-bold mt-0.5">₹{getFullPrice(item)}</p></div><button type="button" onClick={() => onAdd(item, 1, "full")} className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "#eab308", color: "black" }}><Plus size={14} /></button></div>)}</div></div>;
+}
