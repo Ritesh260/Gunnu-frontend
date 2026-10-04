@@ -8,11 +8,11 @@
 .item-card:hover { transform: translateY(-2px); }
 .add-btn { position: relative; overflow: hidden; transition: transform .15s ease, opacity .15s ease; }
 .add-btn::after { content: ''; position: absolute; inset: 0; background: rgba(255,255,255,.15); transform: translateX(-100%); transition: transform .35s ease; }
-.add-btn:hover::after { transform: translateX(100%); }
-.add-btn:active { transform: scale(.97); }
-.flash-ring { position: absolute; inset: -3px; border-radius: 14px; border: 2px solid #eab308; animation: ping .7s ease forwards; pointer-events: none; }
+/* .add-btn:hover::after { transform: translateX(100%); } */
+/* .add-btn:active { transform: scale(.97); } */
+/* .flash-ring { position: absolute; inset: -3px; border-radius: 14px; border: 2px solid #eab308; animation: ping .7s ease forwards; pointer-events: none; } */
 .cart-row { animation: fadeUp .3s ease both; transition: background .2s; }
-.cart-row:hover { background: rgba(255,255,255,.04); }
+/* .cart-row:hover { background: rgba(255,255,255,.04); } */
 .suggest-item { transition: background .2s, border-color .2s; cursor: pointer; }
 .suggest-item:hover { background: rgba(234,179,8,.05); border-color: rgba(234,179,8,.35) !important; }
 .gold-text { background: linear-gradient(90deg,#f59e0b,#fde68a,#f59e0b); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 3s linear infinite; }
