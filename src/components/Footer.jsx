@@ -86,12 +86,12 @@ function Footer() {
             <div className="space-y-4 text-gray-300">
               <p className="flex gap-3">
                 <MapPin size={18} className="text-red-600 mt-1" />
-                Mumbai, Maharashtra
+               Nalasopara East, Mumbai, Maharashtra
               </p>
 
               <p className="flex gap-3">
                 <Phone size={18} className="text-red-600 mt-1" />
-                +91 1234567899
+                +91 9324400197
               </p>
 
               <p className="flex gap-3">
@@ -110,13 +110,13 @@ function Footer() {
             <div className="space-y-4 text-gray-300">
               <p className="flex gap-3">
                 <Clock3 size={18} className="text-red-600 mt-1" />
-                Mon - Fri: 10 AM - 11 PM
+                Mon - Sun: 10 AM - 11 PM
               </p>
 
-              <p className="flex gap-3">
+              {/* <p className="flex gap-3">
                 <Clock3 size={18} className="text-red-600 mt-1" />
                 Sat - Sun: 11 AM - 12 AM
-              </p>
+              </p> */}
             </div>
 
             <button className="mt-6 px-6 py-3 rounded-full bg-gradient-to-r from-red-800 to-yellow-500 font-semibold hover:scale-105 transition duration-300 shadow-lg">
