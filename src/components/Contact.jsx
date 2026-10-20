@@ -52,7 +52,7 @@ function Contact() {
                 <div>
                   <h3 className="text-xl font-semibold">Address</h3>
                   <p className="text-gray-400 mt-1">
-                    Mumbai, Maharashtra, India
+                    Nalasopara East Mumbai, Maharashtra
                   </p>
                 </div>
               </div>
@@ -67,7 +67,7 @@ function Contact() {
                 <div>
                   <h3 className="text-xl font-semibold">Phone</h3>
                   <p className="text-gray-400 mt-1">
-                    +91 1234567899
+                    +91 9324400197
                   </p>
                 </div>
               </div>
