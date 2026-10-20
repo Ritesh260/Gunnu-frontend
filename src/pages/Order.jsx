@@ -105,7 +105,7 @@ function Order() {
     const confirmOrder = () => {
         const orderItems = cart.map((item, index) => `${index + 1}. ${item.name}\nCategory: ${item.category || "General"}\nType: ${item.foodType || ""}\nSize: ${item.size === "half" ? "Half" : "Full"}\nQty: ${item.qty}\nUnit Price: ₹${item.unitPrice}\nItem Total: ₹${getCartItemTotal(item)}`).join("\n\n");
         const message = `*NEW ORDER - Gunnu Chinese Corner*\n\n*CUSTOMER DETAILS*\nName: ${customerName}\nPhone: ${phone}\nAddress: ${address}\nLandmark: ${landmark.trim() || "Not provided"}\n\n*ORDER ITEMS*\n\n${orderItems}\n\n*ORDER SUMMARY*\nTotal Items: ${totalItems}\nGrand Total: ₹${total}\n\n*PAYMENT DETAILS*\nPayment Mode: ${payment}${payment === "UPI Payment" ? `\nUPI App: ${selectedUPI || "Not selected"}\nTransaction ID: ${transactionId}\n` : ""}`;
-        window.open(`https://wa.me/919839621748?text=${encodeURIComponent(message)}`, "_blank");
+        window.open(`https://wa.me/919324400197?text=${encodeURIComponent(message)}`, "_blank");
         setShowModal(false);
     };
 
