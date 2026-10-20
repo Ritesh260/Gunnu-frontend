@@ -119,7 +119,9 @@ function Footer() {
               </p> */}
             </div>
 
-            <button className="mt-6 px-6 py-3 rounded-full bg-gradient-to-r from-red-800 to-yellow-500 font-semibold hover:scale-105 transition duration-300 shadow-lg">
+            <Link 
+              to="/order"
+              className="mt-6 px-6 py-3 rounded-full bg-gradient-to-r from-red-800 to-yellow-500 font-semibold hover:scale-105 transition duration-300 shadow-lg">
               Order Now
             </button>
           </div>
