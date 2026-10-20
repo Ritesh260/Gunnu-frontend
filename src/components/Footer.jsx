@@ -9,7 +9,7 @@ import {
   ChevronRight,
   Heart,
 } from "lucide-react";
-
+import { Link } from "react-router-dom";
 function Footer() {
   return (
     <footer className="relative bg-black text-white border-t border-yellow-500/20 overflow-hidden">
